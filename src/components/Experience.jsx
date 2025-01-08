@@ -7,7 +7,8 @@ import {
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useChat } from "../hooks/useChat";
 import { Avatar } from "./Avatar";
-// import { AvatarBoy } from "./AvatarBoy";
+import { AvatarBoy } from "./AvatarBoy";
+import { Girlfriend } from "./Girlfriend";
 
 const Dots = (props) => {
   const { loading } = useChat();
@@ -40,28 +41,29 @@ const Dots = (props) => {
 
 export const Experience = () => {
   const cameraControls = useRef();
-  const { cameraZoomed } = useChat();
+  const { zoomLevel } = useChat();
 
   useEffect(() => {
-    cameraControls.current.setLookAt(0, 2, 5, 0, 1.5, 0);
-  }, []);
+    // Different positions based on zoom level
+    const zoomPositions = {
+      0: [0, 1.5, 5, 0, 1.0, 0], // Default view
+      1: [0, 1.0, 1.5, 0, 1.0, 0], // First zoom
+      2: [0, 0.8, 1.0, 0, 1.0, 0], // Closer
+      3: [0, 0.6, 0.7, 0, 1.0, 0], // Very close
+    };
 
-  useEffect(() => {
-    if (cameraZoomed) {
-      cameraControls.current.setLookAt(0, 1.5, 1.5, 0, 1.5, 0, true);
-    } else {
-      cameraControls.current.setLookAt(0, 2.2, 5, 0, 1.0, 0, true);
-    }
-  }, [cameraZoomed]);
+    const [px, py, pz, tx, ty, tz] = zoomPositions[zoomLevel];
+    cameraControls.current.setLookAt(px, py, pz, tx, ty, tz, true);
+  }, [zoomLevel]);
+
   return (
     <>
       <CameraControls ref={cameraControls} />
       <Environment preset="sunset" />
-      {/* Wrapping Dots into Suspense to prevent Blink when Troika/Font is loaded */}
       <Suspense>
-        <Dots position-y={1.75} position-x={-0.02} />
+        <Dots position-y={1.25} position-x={-0.02} />
       </Suspense>
-      <Avatar />
+      <Girlfriend position-y={-0.5} />
       <ContactShadows opacity={0.7} />
     </>
   );
